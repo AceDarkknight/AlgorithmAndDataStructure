@@ -70,7 +70,12 @@ func (s *SkipList) GetLength() int32 {
 	return s.length
 }
 
+// Insert will insert a node into skip list. If skip has these this index, overwrite the value, otherwise add it.
 func (s *SkipList) Insert(index int64, value interface{}) {
+	if value == nil {
+		return
+	}
+
 	previousNode, currentNode := s.doSearch(index)
 	if currentNode.Index == index {
 		currentNode.Value = value
@@ -88,23 +93,22 @@ func (s *SkipList) Insert(index int64, value interface{}) {
 	s.length++
 }
 
-func (s *SkipList) Delete(index int64) bool {
-	return false
+// Delete will find the index is existed or not firstly. If existed, delete it, otherwise do nothing.
+func (s *SkipList) Delete(index int64) {
 }
 
+// Search will search the skip list with the given index.
+// If the index exists, return the value, otherwise return nil.
 func (s *SkipList) Search(index int64) interface{} {
-	if s.length <= 0 {
+	_, result := s.doSearch(index)
+	if result.Index != index {
 		return nil
 	} else {
-		_, result := s.doSearch(index)
-		if result.Index != index {
-			return nil
-		} else {
-			return result.Value
-		}
+		return result.Value
 	}
 }
 
+// doSearch will search given index in skip list.
 func (s *SkipList) doSearch(index int64) ([]*node, *node) {
 	// Store all previous node whose index is less than index and whose next node's index is larger than index.
 	previousNodes := make([]*node, s.level)
@@ -134,6 +138,22 @@ func (s *SkipList) doSearch(index int64) ([]*node, *node) {
 	return previousNodes, currentNode
 }
 
+// ForEach will iterate the whole skip list and do the function f for each index and value.
+// Function f will not change the index and value in skip list.
+func (s *SkipList) ForEach(f func(index int64, value interface{}) bool) {
+	currentNode := s.head.next(0)
+	for currentNode != nil {
+		i := currentNode.Index
+		v := currentNode.Value
+		if !f(i, v) {
+			break
+		}
+
+		currentNode = currentNode.next(0)
+	}
+}
+
+// randomLevel will generate and random level that level > 0 and level < skip list's level
 // This comes from redis's implementation.
 func (s *SkipList) randomLevel() int {
 	level := 1

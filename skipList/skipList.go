@@ -1,22 +1,26 @@
 package skipList
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/OneOfOne/xxhash"
 )
 
+// Comes from redis's implementation.
 const (
 	MAX_LEVEL   = 32
 	PROBABILITY = 0.25
 )
 
 type node struct {
-	Index     int64
+	Index     uint64
 	Value     interface{}
 	nextNodes []*node
 }
 
-func newNode(index int64, value interface{}, level int) *node {
+func newNode(index uint64, value interface{}, level int) *node {
 	if level <= 0 || level > MAX_LEVEL {
 		return nil
 	}
@@ -28,8 +32,9 @@ func newNode(index int64, value interface{}, level int) *node {
 	}
 }
 
-func (n *node) next(level int) *node {
-	if level < 0 || level > len(n.nextNodes) {
+// getNextNode will get next with given level. If level < 0 or level > next nodes' length, return nil.
+func (n *node) getNextNode(level int) *node {
+	if level < 0 || level > len(n.nextNodes)-1 {
 		return nil
 	}
 
@@ -43,6 +48,9 @@ type SkipList struct {
 	tail   *node
 }
 
+// NewSkipList will create and initialize a skip list with the given level.
+// Level must between 1 to 32. If not, the level will set as 32.
+// After initialization, the head field's level equal to level parameter and point to tail field.
 func NewSkipList(level int) *SkipList {
 	if level <= 0 || level > MAX_LEVEL {
 		level = MAX_LEVEL
@@ -53,6 +61,7 @@ func NewSkipList(level int) *SkipList {
 	for i := 0; i < len(head.nextNodes); i++ {
 		head.nextNodes[i] = tail
 	}
+	fmt.Printf("tail address:%p\n", tail)
 
 	return &SkipList{
 		level:  level,
@@ -62,22 +71,28 @@ func NewSkipList(level int) *SkipList {
 	}
 }
 
-func (s *SkipList) GetLevel() int {
+// Level will return the level of skip list.
+func (s *SkipList) Level() int {
 	return s.level
 }
 
-func (s *SkipList) GetLength() int32 {
+// Length will return the length of skip list.
+func (s *SkipList) Length() int32 {
 	return s.length
 }
 
 // Insert will insert a node into skip list. If skip has these this index, overwrite the value, otherwise add it.
-func (s *SkipList) Insert(index int64, value interface{}) {
+func (s *SkipList) Insert(index uint64, value interface{}) {
+	// Ignore nil value.
 	if value == nil {
 		return
 	}
 
-	previousNode, currentNode := s.doSearch(index)
-	if currentNode.Index == index {
+	fmt.Printf("start insert %v %v\n", index, value)
+	previousNodes, currentNode := s.doSearch(index)
+
+	// If skip list contains index, update the value.
+	if currentNode.Value != nil && currentNode.Index == index {
 		currentNode.Value = value
 		return
 	}
@@ -85,23 +100,25 @@ func (s *SkipList) Insert(index int64, value interface{}) {
 	pendingNode := newNode(index, value, s.randomLevel())
 
 	// Adjust pointer.
-	for i := 0; i < len(pendingNode.nextNodes); i++ {
-		pendingNode.nextNodes[i] = previousNode[i].next(i)
-		previousNode[i].nextNodes[i] = pendingNode
+	for i := len(pendingNode.nextNodes) - 1; i >= 0; i-- {
+		pendingNode.nextNodes[i] = previousNodes[i].nextNodes[i]
+		previousNodes[i].nextNodes[i] = pendingNode
 	}
 
 	s.length++
+
+	fmt.Printf("end insert:%+v,address:%p\n", pendingNode, pendingNode)
 }
 
 // Delete will find the index is existed or not firstly. If existed, delete it, otherwise do nothing.
-func (s *SkipList) Delete(index int64) {
+func (s *SkipList) Delete(index uint64) {
 }
 
 // Search will search the skip list with the given index.
 // If the index exists, return the value, otherwise return nil.
-func (s *SkipList) Search(index int64) interface{} {
+func (s *SkipList) Search(index uint64) interface{} {
 	_, result := s.doSearch(index)
-	if result.Index != index {
+	if result == nil || result.Index != index {
 		return nil
 	} else {
 		return result.Value
@@ -109,47 +126,47 @@ func (s *SkipList) Search(index int64) interface{} {
 }
 
 // doSearch will search given index in skip list.
-func (s *SkipList) doSearch(index int64) ([]*node, *node) {
-	// Store all previous node whose index is less than index and whose next node's index is larger than index.
+func (s *SkipList) doSearch(index uint64) ([]*node, *node) {
+	// Store all previous node whose index is less than index and whose getNextNode node's index is larger than index.
 	previousNodes := make([]*node, s.level)
+
+	fmt.Printf("start doSearch:%v\n", index)
 	currentNode := s.head
-
-	for l := s.level; l > 0; l-- {
-		// Search form top to bottom.
-		for i := len(currentNode.nextNodes) - 1; i >= 0; i-- {
-			// If next node's index is tail or larger than current node's index, move down.
-			if currentNode.next(i) == s.tail || currentNode.next(i).Index > index {
-				previousNodes[i] = currentNode
-				continue
-			}
-
-			// If index does not exist, it will return the closest node whose index is less than index.
-			if currentNode.next(i).Index <= index {
-				currentNode = currentNode.next(i)
-				break
-			}
+	for l := s.level - 1; l >= 0; l-- {
+		if currentNode.getNextNode(l) == s.tail || currentNode.getNextNode(l).Index > index {
+			previousNodes[l] = currentNode
+			continue
 		}
 
-		if currentNode.Index == index {
-			break
+		if currentNode.getNextNode(l).Index < index {
+			currentNode = currentNode.getNextNode(l)
+			previousNodes[l] = currentNode
 		}
 	}
+	fmt.Printf("previous node:\n")
+	for _, n := range previousNodes {
+		fmt.Printf("%p\t", n)
+	}
+	fmt.Println()
+	fmt.Printf("end doSearch %v\n", index)
 
 	return previousNodes, currentNode
 }
 
 // ForEach will iterate the whole skip list and do the function f for each index and value.
 // Function f will not change the index and value in skip list.
-func (s *SkipList) ForEach(f func(index int64, value interface{}) bool) {
-	currentNode := s.head.next(0)
+func (s *SkipList) ForEach(f func(index uint64, value interface{}) bool) {
+	currentNode := s.head.getNextNode(0)
 	for currentNode != nil {
 		i := currentNode.Index
 		v := currentNode.Value
+		fmt.Printf("%v\n", v)
+
 		if !f(i, v) {
 			break
 		}
 
-		currentNode = currentNode.next(0)
+		currentNode = currentNode.getNextNode(0)
 	}
 }
 
@@ -162,4 +179,13 @@ func (s *SkipList) randomLevel() int {
 	}
 
 	return level
+}
+
+// Hash will calculate the input's hash value using xxHash algorithm.
+// It can be used to calculate the index of skip list.
+// See more detail in https://cyan4973.github.io/xxHash/
+func Hash(input []byte) uint64 {
+	h := xxhash.New64()
+	h.Write(input)
+	return h.Sum64()
 }

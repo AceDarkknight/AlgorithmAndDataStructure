@@ -22,7 +22,7 @@ type node struct {
 
 func newNode(index uint64, value interface{}, level int) *node {
 	if level <= 0 || level > MAX_LEVEL {
-		return nil
+		level = MAX_LEVEL
 	}
 
 	return &node{
@@ -30,15 +30,6 @@ func newNode(index uint64, value interface{}, level int) *node {
 		Value:     value,
 		nextNodes: make([]*node, level),
 	}
-}
-
-// getNextNode will get next with given level. If level < 0 or level > next nodes' length, return nil.
-func (n *node) getNextNode(level int) *node {
-	if level < 0 || level > len(n.nextNodes)-1 {
-		return nil
-	}
-
-	return n.nextNodes[level]
 }
 
 type SkipList struct {
@@ -108,6 +99,7 @@ func (s *SkipList) Insert(index uint64, value interface{}) {
 	s.length++
 
 	fmt.Printf("end insert:%+v,address:%p\n", pendingNode, pendingNode)
+	fmt.Printf("tail address:%p\n", s.tail)
 }
 
 // Delete will find the index is existed or not firstly. If existed, delete it, otherwise do nothing.
@@ -133,15 +125,11 @@ func (s *SkipList) doSearch(index uint64) ([]*node, *node) {
 	fmt.Printf("start doSearch:%v\n", index)
 	currentNode := s.head
 	for l := s.level - 1; l >= 0; l-- {
-		if currentNode.getNextNode(l) == s.tail || currentNode.getNextNode(l).Index > index {
-			previousNodes[l] = currentNode
-			continue
+		for currentNode.nextNodes[l] != s.tail && currentNode.nextNodes[l].Index <= index {
+			currentNode = currentNode.nextNodes[l]
 		}
 
-		if currentNode.getNextNode(l).Index < index {
-			currentNode = currentNode.getNextNode(l)
-			previousNodes[l] = currentNode
-		}
+		previousNodes[l] = currentNode
 	}
 	fmt.Printf("previous node:\n")
 	for _, n := range previousNodes {
@@ -156,7 +144,7 @@ func (s *SkipList) doSearch(index uint64) ([]*node, *node) {
 // ForEach will iterate the whole skip list and do the function f for each index and value.
 // Function f will not change the index and value in skip list.
 func (s *SkipList) ForEach(f func(index uint64, value interface{}) bool) {
-	currentNode := s.head.getNextNode(0)
+	currentNode := s.head.nextNodes[0]
 	for currentNode != nil {
 		i := currentNode.Index
 		v := currentNode.Value
@@ -166,7 +154,7 @@ func (s *SkipList) ForEach(f func(index uint64, value interface{}) bool) {
 			break
 		}
 
-		currentNode = currentNode.getNextNode(0)
+		currentNode = currentNode.nextNodes[0]
 	}
 }
 

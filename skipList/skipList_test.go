@@ -66,6 +66,11 @@ func TestSkipList_Insert(t *testing.T) {
 		}
 	})
 
+	skipList.ForEach(func(index uint64, value interface{}) bool {
+        t.Logf("index:%v value:%v",index,value)
+        return true
+    })
+
 	type args struct {
 		index uint64
 	}

@@ -53,9 +53,9 @@ func BenchmarkSkipList_Search_100000Elements(b *testing.B) {
 	}
 }
 
-func BenchmarkSkipList_Search_1000000Elements(b *testing.B) {
+func BenchmarkSkipList_Search_200000Elements(b *testing.B) {
 	skipList := NewSkipList(32)
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 200000; i++ {
 		skipList.Insert(uint64(i), i)
 	}
 
@@ -66,9 +66,9 @@ func BenchmarkSkipList_Search_1000000Elements(b *testing.B) {
 	}
 }
 
-func BenchmarkSkipList_Search_10000000Elements(b *testing.B) {
+func BenchmarkSkipList_Search_500000Elements(b *testing.B) {
 	skipList := NewSkipList(32)
-	for i := 0; i < 10000000; i++ {
+	for i := 0; i < 500000; i++ {
 		skipList.Insert(uint64(i), i)
 	}
 

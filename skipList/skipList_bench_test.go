@@ -7,25 +7,25 @@ import (
 	"time"
 )
 
-//func BenchmarkSkipList_Insert_Ordered(b *testing.B) {
-//	skipList := NewSkipList(32)
-//	b.ReportAllocs()
-//	for i := 0; i < b.N; i++ {
-//		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
-//		_ = Hash([]byte(strconv.Itoa(t)))
-//		skipList.Insert(uint64(i), i)
-//	}
-//}
-//
-//func BenchmarkSkipList_Insert_Randomly(b *testing.B) {
-//	skipList := NewSkipList(32)
-//	b.ReportAllocs()
-//	for i := 0; i < b.N; i++ {
-//		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
-//		index := Hash([]byte(strconv.Itoa(t)))
-//		skipList.Insert(index, i)
-//	}
-//}
+func BenchmarkSkipList_Insert_Ordered(b *testing.B) {
+	skipList := NewSkipList(32)
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
+		_ = Hash([]byte(strconv.Itoa(t)))
+		skipList.Insert(uint64(i), i)
+	}
+}
+
+func BenchmarkSkipList_Insert_Randomly(b *testing.B) {
+	skipList := NewSkipList(32)
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
+		index := Hash([]byte(strconv.Itoa(t)))
+		skipList.Insert(index, i)
+	}
+}
 
 func BenchmarkSkipList_Search_100000Elements(b *testing.B) {
 	skipList := NewSkipList(32)
@@ -36,7 +36,7 @@ func BenchmarkSkipList_Search_100000Elements(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
+		t := rand.Intn(100000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}
@@ -51,7 +51,7 @@ func BenchmarkSkipList_Search_1000000Elements(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000000)
+		t := rand.Intn(1000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}
@@ -66,7 +66,7 @@ func BenchmarkSkipList_Search_10000000Elements(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(10000000)
+		t := rand.Intn(10000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}
@@ -81,7 +81,7 @@ func BenchmarkSkipList_Search_16Level(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000000)
+		t := rand.Intn(1000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}
@@ -96,7 +96,7 @@ func BenchmarkSkipList_Search_32Level(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000000)
+		t := rand.Intn(1000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}

@@ -5,7 +5,6 @@ package skipList
 
 import (
 	"math/rand"
-	"time"
 
 	"github.com/OneOfOne/xxhash"
 )
@@ -191,7 +190,7 @@ func (s *SkipList) ForEach(f func(index uint64, value interface{}) bool) {
 // This comes from redis's implementation.
 func (s *SkipList) randomLevel() int {
 	level := 1
-	for rand.New(rand.NewSource(time.Now().UnixNano())).Float64() < PROBABILITY && level < s.level {
+	for rand.Float64() < PROBABILITY && level < s.level {
 		level++
 	}
 

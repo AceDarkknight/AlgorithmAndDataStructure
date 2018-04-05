@@ -1,6 +1,7 @@
 package skipList
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -257,4 +258,21 @@ func TestSkipList_Delete(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSkipList_Level(t *testing.T) {
+	skipList := NewSkipList(32)
+	number := 1000000
+	for i := number; i > 0; i-- {
+		skipList.Insert(uint64(i), i)
+	}
+
+	levelCount := make([]int, 33)
+	currentNode := skipList.head.nextNodes[0]
+	for currentNode != skipList.tail {
+		levelCount[len(currentNode.nextNodes)]++
+		currentNode = currentNode.nextNodes[0]
+	}
+
+	fmt.Printf("%#v\n", levelCount)
 }

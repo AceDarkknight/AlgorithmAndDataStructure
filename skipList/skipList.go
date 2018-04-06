@@ -10,6 +10,8 @@ import (
 )
 
 // Comes from redis's implementation.
+// Also you can see more detail in William Pugh's paper <Skip Lists: A Probabilistic Alternative to Balanced Trees>.
+// The paper is in ftp://ftp.cs.umd.edu/pub/skipLists/skiplists.pdf
 const (
 	MAX_LEVEL   = 32
 	PROBABILITY = 0.25
@@ -42,6 +44,10 @@ type SkipList struct {
 
 // NewSkipList will create and initialize a skip list with the given level.
 // Level must between 1 to 32. If not, the level will set as 32.
+// To determine the level, you can see the paper ftp://ftp.cs.umd.edu/pub/skipLists/skiplists.pdf.
+// A simple way to determine the level is L(N) = log(1/PROBABILITY)(N).
+// N is the count of the skip list which you can estimate. PROBABILITY is 0.25 in this case.
+// For example, if you expect the skip list contains 10000000 elements, then N = 10000000, L(N) ≈ 12.
 // After initialization, the head field's level equal to level parameter and point to tail field.
 func NewSkipList(level int) *SkipList {
 	if level <= 0 || level > MAX_LEVEL {
@@ -134,7 +140,7 @@ func (s *SkipList) Search(index uint64) interface{} {
 // The first return value represents the previous nodes need to update when call Insert function.
 // The second return value represents the node with given index or the closet node whose index is larger than given index.
 func (s *SkipList) doSearch(index uint64) ([]*node, *node) {
-	// Store all previous node whose index is less than index and whose getNextNode node's index is larger than index.
+	// Store all previous node whose index is less than index and whose next node's index is larger than index.
 	previousNodes := make([]*node, s.level)
 
 	// fmt.Printf("start doSearch:%v\n", index)
@@ -152,6 +158,7 @@ func (s *SkipList) doSearch(index uint64) ([]*node, *node) {
 		previousNodes[l] = currentNode
 	}
 
+	// Avoid point to tail which will occur panic in Insert and Delete function.
 	// When the next node is tail.
 	// The index is larger than the maximum index in the skip list or skip list's length is 0. Don't point to tail.
 	// When the next node isn't tail.

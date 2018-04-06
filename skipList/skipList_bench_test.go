@@ -72,31 +72,31 @@ func BenchmarkSkipList_Search_10000000Elements(b *testing.B) {
 	}
 }
 
-func BenchmarkSkipList_Search_16Level(b *testing.B) {
-	skipList := NewSkipList(16)
-	for i := 0; i < 1000000; i++ {
+func BenchmarkSkipList_Search_12Level(b *testing.B) {
+	skipList := NewSkipList(12)
+	for i := 0; i < 10000000; i++ {
 		skipList.Insert(uint64(i), i)
 	}
 
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.Intn(1000000)
+		t := rand.Intn(10000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}
 }
 
-func BenchmarkSkipList_Search_32Level(b *testing.B) {
-	skipList := NewSkipList(32)
-	for i := 0; i < 1000000; i++ {
+func BenchmarkSkipList_Search_24Level(b *testing.B) {
+	skipList := NewSkipList(24)
+	for i := 0; i < 10000000; i++ {
 		skipList.Insert(uint64(i), i)
 	}
 
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		t := rand.Intn(1000000)
+		t := rand.Intn(10000000)
 		index := Hash([]byte(strconv.Itoa(t)))
 		skipList.Search(index)
 	}

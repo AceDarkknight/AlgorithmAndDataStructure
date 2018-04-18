@@ -8,7 +8,7 @@ import (
 )
 
 func BenchmarkSkipList_Insert_Ordered(b *testing.B) {
-	skipList := NewSkipList(32)
+	skipList := NewSkipList(10)
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)
@@ -18,7 +18,7 @@ func BenchmarkSkipList_Insert_Ordered(b *testing.B) {
 }
 
 func BenchmarkSkipList_Insert_Randomly(b *testing.B) {
-	skipList := NewSkipList(32)
+	skipList := NewSkipList(10)
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		t := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)

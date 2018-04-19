@@ -12,6 +12,7 @@ func NewQueue(name string, capacity int) Queue {
 	case "normal":
 		q, _ = NewNormalQueue(capacity)
 	case "unique":
+		q, _ = NewUniqueQueue(capacity)
 	case "cyclic":
 	}
 
@@ -28,6 +29,7 @@ func TestQueue_Length(t *testing.T) {
 		args args
 	}{
 		{"test normal", args{"normal", -1}},
+		{"test unique", args{"unique", -1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -46,7 +48,7 @@ func TestQueue_Rear(t *testing.T) {
 
 }
 
-func TestNormalQueue_Enqueue(t *testing.T) {
+func TestQueue_Dequeue(t *testing.T) {
 	type args struct {
 		name     string
 		capacity int
@@ -57,10 +59,17 @@ func TestNormalQueue_Enqueue(t *testing.T) {
 		args args
 		want []interface{}
 	}{
+		// Normal queue.
 		{"test normal", args{"normal", 10, []interface{}{0}}, []interface{}{0}},
 		{"test normal", args{"normal", 10, []interface{}{666, 55, 4, -3}}, []interface{}{666, 55, 4, -3, nil}},
 		{"test normal", args{"normal", 10, []interface{}{nil, nil}}, []interface{}{nil, nil, nil}},
 		{"test normal", args{"normal", 3, []interface{}{0, 1, 2, 3, 4}}, []interface{}{0, 1, 2, nil, nil}},
+		// Unique queue.
+		{"test unique", args{"unique", 10, []interface{}{0}}, []interface{}{0}},
+		{"test unique", args{"unique", 10, []interface{}{666, 55, 4, -3}}, []interface{}{666, 55, 4, -3, nil}},
+		{"test unique", args{"unique", 10, []interface{}{nil, nil}}, []interface{}{nil, nil, nil}},
+		{"test unique", args{"unique", 3, []interface{}{0, 1, 2, 3, 4}}, []interface{}{0, 1, 2, nil, nil}},
+		{"test unique", args{"unique", 3, []interface{}{0, 0, 0, 0, 0}}, []interface{}{0, nil, nil, nil, nil}},
 	}
 	for _, tt := range tests {
 		q := NewQueue(tt.args.name, tt.args.capacity)
@@ -78,6 +87,39 @@ func TestNormalQueue_Enqueue(t *testing.T) {
 	}
 }
 
-func TestQueue_Dequeue(t *testing.T) {
-
+func TestQueue_Enqueue(t *testing.T) {
+	type args struct {
+		name     string
+		capacity int
+		value    []interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want []bool
+	}{
+		// Normal queue.
+		{"test normal", args{"normal", 10, []interface{}{0}}, []bool{true}},
+		{"test normal", args{"normal", 10, []interface{}{666, 55, 4, -3}}, []bool{true, true, true, true}},
+		{"test normal", args{"normal", 10, []interface{}{nil, nil}}, []bool{false, false}},
+		{"test normal", args{"normal", 3, []interface{}{0, 1, 2, 3, 4}}, []bool{true, true, true, false, false}},
+		// Unique queue.
+		{"test unique", args{"unique", 10, []interface{}{0}}, []bool{true}},
+		{"test unique", args{"unique", 10, []interface{}{666, 55, 4, -3}}, []bool{true, true, true, true}},
+		{"test unique", args{"unique", 10, []interface{}{nil, nil}}, []bool{false, false}},
+		{"test unique", args{"unique", 3, []interface{}{0, 1, 2, 3, 4}}, []bool{true, true, true, false, false}},
+		{"test unique", args{"unique", 3, []interface{}{0, 0, 0, 0, 0}}, []bool{true, false, false, false, false}},
+		{"test unique", args{"unique", 4, []interface{}{int32(0), int64(0), int8(0), 0, 0}}, []bool{true, true, true, true, false}},
+		{"test unique", args{"unique", 3, []interface{}{[]int{0, 0}, []int{0, 0}, 0, 1, "1"}}, []bool{false, false, true, true, true}},
+	}
+	for _, tt := range tests {
+		q := NewQueue(tt.args.name, tt.args.capacity)
+		for i := 0; i < len(tt.args.value); i++ {
+			t.Run(fmt.Sprintf(tt.name+"%d", i+1), func(t *testing.T) {
+				if got := q.Enqueue(tt.args.value[i]); got != tt.want[i] {
+					t.Errorf("Eequeue() got %v, want %v", got, tt.want[i])
+				}
+			})
+		}
+	}
 }

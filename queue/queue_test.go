@@ -70,6 +70,9 @@ func TestQueue_Dequeue(t *testing.T) {
 		{"test unique", args{"unique", 10, []interface{}{nil, nil}}, []interface{}{nil, nil, nil}},
 		{"test unique", args{"unique", 3, []interface{}{0, 1, 2, 3, 4}}, []interface{}{0, 1, 2, nil, nil}},
 		{"test unique", args{"unique", 3, []interface{}{0, 0, 0, 0, 0}}, []interface{}{0, nil, nil, nil, nil}},
+		{"test unique", args{"unique", 4, []interface{}{int32(0), int64(0), int8(0), 0, 0}}, []interface{}{int32(0), int64(0), int8(0), 0, nil}},
+		{"test unique", args{"unique", 3, []interface{}{[]int{0, 0}, []int{0, 0}, 0, 1, "1"}}, []interface{}{0, 1, "1", nil, nil}},
+		{"test unique", args{"unique", 3, []interface{}{0, 1, 0, 2, 0}}, []interface{}{0, 1, 2, nil, nil}},
 	}
 	for _, tt := range tests {
 		q := NewQueue(tt.args.name, tt.args.capacity)

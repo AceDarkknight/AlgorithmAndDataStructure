@@ -41,10 +41,18 @@ func (q *NormalQueue) Capacity() int {
 }
 
 func (q *NormalQueue) Front() *Node {
+	if q.length == 0 {
+		return nil
+	}
+
 	return q.front.next
 }
 
 func (q *NormalQueue) Rear() *Node {
+	if q.length == 0 {
+		return nil
+	}
+
 	return q.rear.previous
 }
 

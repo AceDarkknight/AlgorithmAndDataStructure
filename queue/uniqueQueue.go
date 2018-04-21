@@ -47,10 +47,18 @@ func (q *UniqueQueue) Capacity() int {
 }
 
 func (q *UniqueQueue) Front() *Node {
+	if q.length == 0 {
+		return nil
+	}
+
 	return q.front.next
 }
 
 func (q *UniqueQueue) Rear() *Node {
+	if q.length == 0 {
+		return nil
+	}
+
 	return q.rear.previous
 }
 

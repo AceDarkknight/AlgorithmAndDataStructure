@@ -3,8 +3,8 @@ package queue
 import "errors"
 
 type CyclicQueue struct {
-	front    *Node
-	rear     *Node
+	front    int
+	rear     int
 	length   int
 	capacity int
 	nodes    []*Node
@@ -15,18 +15,11 @@ func NewCyclicQueue(capacity int) (*CyclicQueue, error) {
 		return nil, errors.New("capacity is less than 0")
 	}
 
-	front := &Node{
-		value: nil,
-	}
+	nodes := make([]*Node, capacity, capacity)
 
-	rear := &Node{
-		value: nil,
-	}
-
-	nodes := make([]*Node, 0, capacity)
 	return &CyclicQueue{
-		front:    front,
-		rear:     rear,
+		front:    -1,
+		rear:     -1,
 		capacity: capacity,
 		nodes:    nodes,
 	}, nil
@@ -45,7 +38,7 @@ func (q *CyclicQueue) Front() *Node {
 		return nil
 	}
 
-	return q.front.next
+	return q.nodes[q.front]
 }
 
 func (q *CyclicQueue) Rear() *Node {
@@ -53,7 +46,7 @@ func (q *CyclicQueue) Rear() *Node {
 		return nil
 	}
 
-	return q.rear.previous
+	return q.nodes[q.rear]
 }
 
 func (q *CyclicQueue) Enqueue(value interface{}) bool {
@@ -65,6 +58,11 @@ func (q *CyclicQueue) Enqueue(value interface{}) bool {
 		value: value,
 	}
 
+	index := (q.rear + 1) % cap(q.nodes)
+	q.nodes[index] = node
+	q.rear = index
+	q.length++
+
 	return true
 }
 
@@ -72,4 +70,11 @@ func (q *CyclicQueue) Dequeue() interface{} {
 	if q.length == 0 {
 		return nil
 	}
+
+	index := (q.front + 1) % cap(q.nodes)
+	result := q.nodes[index].value
+	q.front = index
+	q.length--
+
+	return result
 }

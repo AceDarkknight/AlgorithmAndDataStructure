@@ -14,6 +14,7 @@ func NewQueue(name string, capacity int) Queue {
 	case "unique":
 		q, _ = NewUniqueQueue(capacity)
 	case "cyclic":
+		q, _ = NewCyclicQueue(capacity)
 	}
 
 	return q
@@ -30,6 +31,7 @@ func TestQueue_Length(t *testing.T) {
 	}{
 		{"test normal", args{"normal", -1}},
 		{"test unique", args{"unique", -1}},
+		{"test cyclic", args{"cyclic", -1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -73,6 +75,11 @@ func TestQueue_Dequeue(t *testing.T) {
 		{"test unique", args{"unique", 4, []interface{}{int32(0), int64(0), int8(0), 0, 0}}, []interface{}{int32(0), int64(0), int8(0), 0, nil}},
 		{"test unique", args{"unique", 3, []interface{}{[]int{0, 0}, []int{0, 0}, 0, 1, "1"}}, []interface{}{0, 1, "1", nil, nil}},
 		{"test unique", args{"unique", 3, []interface{}{0, 1, 0, 2, 0}}, []interface{}{0, 1, 2, nil, nil}},
+		// Cyclic queue.
+		{"test cyclic", args{"cyclic", 10, []interface{}{0}}, []interface{}{0}},
+		{"test cyclic", args{"cyclic", 10, []interface{}{666, 55, 4, -3}}, []interface{}{666, 55, 4, -3, nil}},
+		{"test cyclic", args{"cyclic", 10, []interface{}{nil, nil}}, []interface{}{nil, nil, nil}},
+		{"test cyclic", args{"cyclic", 3, []interface{}{0, 1, 2, 3, 4}}, []interface{}{0, 1, 2, nil, nil}},
 	}
 	for _, tt := range tests {
 		q := NewQueue(tt.args.name, tt.args.capacity)

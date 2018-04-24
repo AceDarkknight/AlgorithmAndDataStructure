@@ -71,6 +71,7 @@ func (q *UniqueQueue) Enqueue(value interface{}) bool {
 		value: value,
 	}
 
+	// Ignore uncomparable type.
 	if kind := reflect.TypeOf(value).Kind(); kind == reflect.Map || kind == reflect.Slice || kind == reflect.Func {
 		return false
 	}

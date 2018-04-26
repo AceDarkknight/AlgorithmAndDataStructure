@@ -92,14 +92,14 @@ func TestQueue_Front(t *testing.T) {
 	q.Enqueue(1)
 	q.Enqueue(2)
 	t.Run("test 4", func(t *testing.T) {
-		if front := q.Front(); front.value != 1 || front.next.value != 2 {
+		if front := q.Front(); front.value != 1 {
 			t.Errorf("Front() got %v, want %v", front.value, 1)
 		}
 	})
 
 	q.Dequeue()
 	t.Run("test 5", func(t *testing.T) {
-		if front := q.Front(); front.value != 2 || front.next.value != nil {
+		if front := q.Front(); front.value != 2 {
 			t.Errorf("Front() got %v, want %v", front.value, 2)
 		}
 	})

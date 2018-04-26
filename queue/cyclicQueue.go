@@ -63,6 +63,10 @@ func (q *CyclicQueue) Enqueue(value interface{}) bool {
 	q.rear = index
 	q.length++
 
+	if q.length == 1 {
+		q.front = index
+	}
+
 	return true
 }
 
@@ -71,8 +75,9 @@ func (q *CyclicQueue) Dequeue() interface{} {
 		return nil
 	}
 
+	result := q.nodes[q.front].value
+	q.nodes[q.front] = nil
 	index := (q.front + 1) % cap(q.nodes)
-	result := q.nodes[index].value
 	q.front = index
 	q.length--
 
